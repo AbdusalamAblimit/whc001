@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UNESCO World Heritage Explorer</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+</head>
+<body>
+  <header>
+    <div class="title-block">
+      <h1>UNESCO World Heritage Explorer</h1>
+      <p>An interactive, linked-view dashboard (map, timeline, sunburst) to reveal spatial distribution, annual rhythms, category mix, and danger trajectories since 1978.</p>
+    </div>
+    <div class="highlight-panels">
+      <div class="panel" id="summary-counts"></div>
+      <div class="panel" id="sunburst-breadcrumb">All Regions</div>
+    </div>
+  </header>
+
+  <section class="controls">
+    <div class="control-group">
+      <label for="yearSlider">Year</label>
+      <div class="slider-wrapper">
+        <button id="playToggle" aria-label="Play or pause year animation">▶︎</button>
+        <input type="range" id="yearSlider" min="1978" max="2024" value="2024" />
+        <span id="yearValue">2024</span>
+      </div>
+    </div>
+    <div class="control-group">
+      <label for="viewMode">Timeline grouping</label>
+      <select id="viewMode">
+        <option value="category">By category (Cultural/Natural/Mixed)</option>
+        <option value="region">By UNESCO region</option>
+      </select>
+    </div>
+    <div class="control-group criteria">
+      <div class="criteria-header">
+        <span>Selection criteria (i–x)</span>
+        <button id="criteriaMode" data-mode="OR">Mode: match any</button>
+      </div>
+      <div id="criteriaList" class="criteria-grid"></div>
+    </div>
+    <div class="control-group">
+      <label for="searchInput">Search country/site</label>
+      <input type="text" id="searchInput" list="searchOptions" placeholder="Type a name..." />
+      <datalist id="searchOptions"></datalist>
+    </div>
+    <div class="control-inline">
+      <label><input type="checkbox" id="dangerOnly" /> Show only sites In Danger</label>
+      <label><input type="checkbox" id="andDangerEvents" checked /> Overlay danger events on timeline</label>
+    </div>
+  </section>
+
+  <main>
+    <section class="view" id="mapView">
+      <div class="view-header">
+        <h2>Global distribution (Equal Earth)</h2>
+        <p>Color = category; stroke = danger status; opacity & stroke highlight = time brush.</p>
+      </div>
+      <div class="view-body">
+        <svg id="map"></svg>
+        <div id="mapLegend" class="legend"></div>
+      </div>
+    </section>
+
+    <section class="view" id="timelineView">
+      <div class="view-header">
+        <h2>Annual inscription rhythm</h2>
+        <p>Brush to highlight map points; lines show danger events (Y = added to list, R = removed).</p>
+      </div>
+      <div class="view-body">
+        <svg id="timeline"></svg>
+        <div class="legend" id="timelineLegend"></div>
+      </div>
+    </section>
+
+    <section class="view" id="sunburstView">
+      <div class="view-header">
+        <h2>Region → Country → Category</h2>
+        <p>Click a ring to filter other views; click again to move up.</p>
+      </div>
+      <div class="view-body">
+        <svg id="sunburst"></svg>
+      </div>
+    </section>
+  </main>
+
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+
+  <footer>
+    Data: <a href="https://whc.unesco.org/" target="_blank" rel="noopener noreferrer">UNESCO World Heritage Centre</a> | Visualization: D3.js
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
