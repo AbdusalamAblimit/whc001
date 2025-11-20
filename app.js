@@ -2,16 +2,16 @@ const d3 = window.d3;
 const topojson = window.topojson;
 
 const criteriaDefinitions = {
-  i: '代表人类创造力的杰作',
-  ii: '在人类价值观交流上体现出重要影响',
-  iii: '对一种文化或文明的独特/至少特殊的见证',
-  iv: '建筑或技术集合的杰出范例',
-  v: '传统人类居住地或土地/海洋利用的杰出实例',
-  vi: '与重大事件/思想/信仰或艺术文学作品直接相关',
-  vii: '展现超凡自然现象或美学价值',
-  viii: '地质/地貌形成历史的突出范例',
-  ix: '展示生物和生态过程的重要实例',
-  x: '保护原始自然栖息地、维系生物多样性的关键区域'
+  i: 'Represents a masterpiece of human creative genius.',
+  ii: 'Exhibits an important interchange of human values over time.',
+  iii: 'Bears a unique or exceptional testimony to a cultural tradition or civilization.',
+  iv: 'Is an outstanding example of a type of building, architectural or technological ensemble or landscape.',
+  v: 'Is an outstanding example of traditional human settlement, land-use, or sea-use.',
+  vi: 'Is directly or tangibly associated with events, living traditions, ideas, beliefs, or artistic works.',
+  vii: 'Contains superlative natural phenomena or areas of exceptional natural beauty and aesthetic importance.',
+  viii: 'Is an outstanding example representing major stages of Earth’s history.',
+  ix: 'Is an outstanding example representing significant ongoing ecological and biological processes.',
+  x: 'Contains the most important and significant natural habitats for in-situ conservation of biological diversity.'
 };
 
 const criteriaOrder = Object.keys(criteriaDefinitions);
@@ -23,10 +23,10 @@ const categoryColor = d3
 
 const dangerColors = { Y: '#fb923c', R: '#38bdf8' };
 const categoryLabels = {
-  Cultural: '文化 Cultural',
-  Natural: '自然 Natural',
-  Mixed: '混合 Mixed',
-  Other: '其他 / 未注明'
+  Cultural: 'Cultural',
+  Natural: 'Natural',
+  Mixed: 'Mixed',
+  Other: 'Other / Unspecified'
 };
 
 const state = {
@@ -72,8 +72,8 @@ Promise.all([
 ])
   .then(init)
   .catch((error) => {
-    console.error('加载数据出错', error);
-    summaryCounts.text('无法加载数据，请检查网络。');
+    console.error('Failed to load data', error);
+    summaryCounts.text('Unable to load data. Please check your network connection.');
   });
 
 function init([rawSites, worldData]) {
@@ -108,13 +108,13 @@ function formatSite(d) {
   const year = parseYear(d.date_inscribed ?? d.secondary_dates);
   if (!year) return null;
   const criteria = parseCriteria(d.criteria_txt);
-  const countries = Array.isArray(d.states_names) && d.states_names.length ? d.states_names : ['未注明国家'];
+  const countries = Array.isArray(d.states_names) && d.states_names.length ? d.states_names : ['Unspecified country'];
   const dangerEvents = parseDangerList(d.danger_list);
   const category = ['Cultural', 'Natural', 'Mixed'].includes(d.category) ? d.category : 'Other';
   return {
     id: d.uuid ?? d.id_no ?? d.name_en,
     name: d.name_en,
-    region: d.region ?? '未注明区域',
+    region: d.region ?? 'Unspecified region',
     year,
     category,
     criteria,
@@ -126,8 +126,8 @@ function formatSite(d) {
     dangerEvents,
     dangerTimeline: dangerEvents.length
       ? dangerEvents.map((evt) => `${evt.type} ${evt.year}`).join(' → ')
-      : '暂无记录',
-    description: d.short_description_zh || d.short_description_en || '',
+      : 'No recorded danger events',
+    description: d.short_description_en || d.short_description_zh || '',
     iso: d.iso_codes,
     url: d.main_image_url?.url,
     criteriaText: d.criteria_txt
@@ -239,7 +239,7 @@ function setupControlListeners() {
     state.standardMode = state.standardMode === 'OR' ? 'AND' : 'OR';
     d3.select(this)
       .attr('data-mode', state.standardMode)
-      .text(state.standardMode === 'OR' ? '模式：包含任一' : '模式：全部满足');
+      .text(state.standardMode === 'OR' ? 'Mode: match any' : 'Mode: match all');
     render();
   });
 
@@ -247,7 +247,7 @@ function setupControlListeners() {
 
   breadcrumb.on('click', () => {
     state.sunburstSelection = null;
-    breadcrumb.text('全部区域');
+    breadcrumb.text('All Regions');
     render();
   });
 }
@@ -352,7 +352,7 @@ function showTooltip(event, d) {
     ? `<ul>${d.criteria
         .map((code) => `<li><strong>${code.toUpperCase()}</strong> ${criteriaDefinitions[code]}</li>`)
         .join('')}</ul>`
-    : '<p>暂无标准信息</p>';
+    : '<p>No criteria listed</p>';
   tooltip
     .html(`
       <h3>${d.name}</h3>
@@ -360,8 +360,8 @@ function showTooltip(event, d) {
       <div>${d.year} ｜ ${d.category}</div>
       <div>${d.danger ? '<span class="danger-pill">In Danger</span>' : ''}</div>
       <div>${d.description}</div>
-      <div><strong>标准</strong>${criteriaHtml}</div>
-      <div><strong>濒危轨迹：</strong>${d.dangerTimeline}</div>
+      <div><strong>Criteria</strong>${criteriaHtml}</div>
+      <div><strong>Danger events:</strong> ${d.dangerTimeline}</div>
     `)
     .style('left', `${event.pageX + 16}px`)
     .style('top', `${event.pageY - 16}px`)
@@ -628,7 +628,7 @@ function handleSunburstClick(node) {
   if (state.sunburstSelection?.region) labelParts.push(state.sunburstSelection.region);
   if (state.sunburstSelection?.country) labelParts.push(state.sunburstSelection.country);
   if (state.sunburstSelection?.category) labelParts.push(state.sunburstSelection.category);
-  breadcrumb.text(labelParts.length ? labelParts.join(' → ') : '全部区域');
+  breadcrumb.text(labelParts.length ? labelParts.join(' → ') : 'All Regions');
   render();
 }
 
@@ -694,7 +694,7 @@ function updateSummary(data) {
   data.forEach((site) => site.countries.forEach((c) => countries.add(c)));
   const dangerCount = data.filter((site) => site.danger).length;
   summaryCounts.html(
-    `<div>${data.length.toLocaleString()} 个站点 ｜ ${countries.size} 个国家 ｜ ${dangerCount} 个濒危</div>`
+    `<div>${data.length.toLocaleString()} sites | ${countries.size} countries | ${dangerCount} In Danger</div>`
   );
 }
 
@@ -722,8 +722,8 @@ function updateLegends() {
     color: colorScale(key)
   }));
   if (state.showDangerEvents) {
-    items.push({ label: '列入濒危 (Y)', color: dangerColors.Y });
-    items.push({ label: '移出濒危 (R)', color: dangerColors.R });
+    items.push({ label: 'Added to danger list (Y)', color: dangerColors.Y });
+    items.push({ label: 'Removed from danger (R)', color: dangerColors.R });
   }
   legend
     .selectAll('span')
