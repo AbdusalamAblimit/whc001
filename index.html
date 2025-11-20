@@ -25,9 +25,10 @@
       <label for="yearSlider">Year</label>
       <div class="slider-wrapper">
         <button id="playToggle" aria-label="Play or pause year animation">▶︎</button>
-        <input type="range" id="yearSlider" min="1978" max="2024" value="2024" />
+        <input type="range" id="yearSlider" min="1978" max="2024" value="2024" step="1" />
         <span id="yearValue">2024</span>
       </div>
+      <p class="control-hint">Drag the slider to jump to any year instantly; playback pauses while scrubbing.</p>
     </div>
     <div class="control-group">
       <label for="viewMode">Timeline grouping</label>

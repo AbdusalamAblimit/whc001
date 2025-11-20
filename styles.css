@@ -101,6 +101,12 @@ header {
   flex: 1;
 }
 
+.control-hint {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 button,
 select,
 input[type="text"],

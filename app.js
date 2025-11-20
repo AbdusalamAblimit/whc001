@@ -166,6 +166,16 @@ function updateYearSlider() {
   document.getElementById('yearValue').textContent = state.year;
 }
 
+function setYear(year, { pausePlayback = false } = {}) {
+  const clamped = Math.max(yearExtent[0], Math.min(yearExtent[1], Math.round(year)));
+  if (pausePlayback && state.playing) {
+    stopPlayback();
+  }
+  state.year = clamped;
+  updateYearSlider();
+  render();
+}
+
 function setupCriteriaControls() {
   const container = d3.select('#criteriaList');
   const entries = criteriaOrder.map((code) => ({ code, desc: criteriaDefinitions[code] }));
@@ -207,11 +217,11 @@ function setupSearchOptions() {
 }
 
 function setupControlListeners() {
-  d3.select('#yearSlider').on('input', (event) => {
-    state.year = +event.target.value;
-    document.getElementById('yearValue').textContent = state.year;
-    render();
-  });
+  d3
+    .select('#yearSlider')
+    .on('input', (event) => setYear(+event.target.value, { pausePlayback: true }))
+    .on('change', (event) => setYear(+event.target.value, { pausePlayback: true }))
+    .on('pointerdown', () => stopPlayback());
 
   d3.select('#viewMode').on('change', (event) => {
     state.viewMode = event.target.value;
@@ -253,23 +263,23 @@ function setupControlListeners() {
 }
 
 function togglePlay() {
-  state.playing = !state.playing;
-  const button = d3.select('#playToggle');
   if (state.playing) {
-    button.text('⏸');
-    playTimer = setInterval(() => {
-      if (state.year >= yearExtent[1]) {
-        state.year = yearExtent[0];
-      } else {
-        state.year += 1;
-      }
-      updateYearSlider();
-      render();
-    }, 800);
+    stopPlayback();
   } else {
-    button.text('▶︎');
-    clearInterval(playTimer);
+    state.playing = true;
+    d3.select('#playToggle').text('⏸');
+    playTimer = setInterval(() => {
+      const nextYear = state.year >= yearExtent[1] ? yearExtent[0] : state.year + 1;
+      setYear(nextYear);
+    }, 800);
   }
+}
+
+function stopPlayback() {
+  if (!state.playing) return;
+  state.playing = false;
+  d3.select('#playToggle').text('▶︎');
+  clearInterval(playTimer);
 }
 
 function initMap() {
